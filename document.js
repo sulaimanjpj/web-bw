@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
             response: "Our E-commerce Solutions provide powerful, user-friendly online stores with secure payment integrations, designed to maximize your sales and streamline your digital storefront."
         },
         {
-            keywords: ["contact", "reach out", "get in touch", "phone", "email", "address", "call us", "message", "connect", "support","talk"],
+            keywords: ["contact", "reach out", "get in touch", "phone", "email", "address", "call us", "message", "connect", "support","talk","i want a website"],
             response: "You can easily connect with Digital Horizon! <br><strong>Email:</strong> <a href='mailto:baathish9.com'> baathish9@gmail.com</a><br><strong>Phone:</strong>  +267 75 982 477<br>Or visit our Contact section for our full address. We're eager to hear from you!"
         },
         {
