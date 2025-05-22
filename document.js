@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // Custom Chatbot Widget Functionality
+    // --- Custom Chatbot Widget Functionality ---
     const chatbotButton = document.getElementById('chatbot-button');
     const chatbotBox = document.getElementById('chatbot-box');
     const closeChatbot = document.getElementById('close-chatbot');
@@ -83,67 +83,81 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatbotInput = document.getElementById('chatbot-input');
     const chatbotSend = document.getElementById('chatbot-send');
 
-    // Chatbot Knowledge Base (Updated for Digital Horizon)
+    // Bot state to manage inquiry and meeting booking flow
+    let botState = 'idle'; // Can be 'idle', 'awaiting_email_inquiry', 'awaiting_message_inquiry', 'awaiting_meeting_date', 'awaiting_meeting_time', 'awaiting_meeting_name', 'awaiting_meeting_contact'
+    let inquiryDetails = {}; // Stores details for general inquiry or meeting booking
+
+    // Expanded Knowledge Base for general chat responses and service details
     const chatbotKnowledge = [
         {
-            keywords: ["hello", "hi", "hey", "greetings", "digital horizon"],
-            response: "Hello! I'm your Digital Horizon assistant. I can tell you about our innovative services, how to connect with us, or give you an overview of our mission. What's on your mind?"
+            keywords: ["hello", "hi", "hey", "greetings"],
+            response: "Hello! I'm your Digital Horizon assistant. How can I help you today? You can ask about our services, what a website is, or type 'send inquiry' to send a message or 'book meeting' to schedule a call."
         },
         {
-            keywords: ["services", "what do you do", "offerings", "provide", "solutions"],
-            response: "Digital Horizon specializes in cutting-edge Web Design, robust Web Development, impactful Digital Marketing, and seamless E-commerce Solutions. Which area are you interested in?"
+            keywords: ["services", "what do you do", "offerings"],
+            response: "Digital Horizon offers comprehensive services to elevate your online presence. We specialize in **Web Design**, **Web Development**, **Digital Marketing**, and **E-commerce Solutions**. Which one would you like to know more about?"
         },
         {
-            keywords: ["web design", "website design", "design services", "ui/ux", "look and feel"],
-            response: "Our Web Design service crafts stunning, intuitive, and responsive interfaces designed to captivate your audience and elevate your brand aesthetic."
+            keywords: ["web design", "design service"],
+            response: "Our **Web Design** service focuses on creating visually stunning, user-friendly, and responsive websites. We ensure your site looks great on any device and provides an intuitive experience for your visitors. We cover UI/UX design, graphic integration, and overall site aesthetics."
         },
         {
-            keywords: ["web development", "website development", "build a site", "coding", "develop a site"],
-            response: "With Web Development, we build high-performance, secure, and scalable web applications from scratch, tailored precisely to your business objectives."
+            keywords: ["web development", "build website", "coding"],
+            response: "With **Web Development**, we bring your design to life using the latest coding standards and robust technologies. This includes custom website builds, content management system (CMS) integration (like WordPress), and ensuring high performance and security."
         },
         {
-            keywords: ["digital marketing", "seo", "marketing", "content marketing", "online visibility"],
-            response: "Our Digital Marketing strategies are designed to boost your online presence and accelerate growth through targeted SEO, impactful social media campaigns, and compelling content."
+            keywords: ["digital marketing", "seo", "marketing"],
+            response: "**Digital Marketing** at Digital Horizon helps you reach your target audience and grow your brand online. Our services include Search Engine Optimization (SEO) to improve visibility, Social Media Marketing, Content Marketing, and Paid Advertising (PPC) campaigns."
         },
         {
-            keywords: ["e-commerce", "online store", "shop", "sell online", "e-shop"],
-            response: "Our E-commerce Solutions provide powerful, user-friendly online stores with secure payment integrations, designed to maximize your sales and streamline your digital storefront."
+            keywords: ["e-commerce", "online store", "sell online"],
+            response: "Our **E-commerce Solutions** are designed to build powerful online stores that convert visitors into customers. We specialize in platforms like Shopify and WooCommerce, secure payment gateway integration, product catalog management, and seamless shopping experiences."
         },
         {
-            keywords: ["contact", "reach out", "get in touch", "phone", "email", "address", "call us", "message", "connect", "support","talk","i need website"],
-            response: "You can easily connect with Digital Horizon! <br><strong>Email:</strong> <a href='mailto:baathish9.com'> baathish9@gmail.com</a><br><strong>Phone:</strong>  +267 75 982 477<br>Or visit our Contact section for our full address. We're eager to hear from you!"
+            keywords: ["what is a website", "explain website"],
+            response: "A **website** is a collection of related web pages, images, videos, and other digital assets hosted on a server and accessible via the internet. It serves as your digital storefront, portfolio, or information hub, allowing people worldwide to find and interact with your business or content. Think of it as your virtual office or brochure, available 24/7!"
         },
         {
-            keywords: ["pricing", "cost", "quote", "how much", "budget", "price","affordability"],
-            response: "Our project costs are customized based on scope and complexity to ensure you get the best value. We offer transparent pricing after a detailed consultation. For a personalized quote, please reach out to us!"
+            keywords: ["responsive", "mobile friendly", "phone", "tablet"],
+            response: "A **responsive website** is designed to adapt and display beautifully on any device size – whether it's a desktop computer, a tablet, or a smartphone. This means text, images, and layout automatically adjust so users always have an optimal viewing and interaction experience without awkward zooming or scrolling."
         },
         {
-            keywords: ["about us", "who are you", "your team", "history", "company","mission"],
-            response: "Digital Horizon is a collective of passionate digital innovators. Our mission is to transform your vision into impactful online experiences through cutting-edge technology and a client-centric approach."
+            keywords: ["about us", "who are you", "company"],
+            response: "Digital Horizon is a team of passionate digital innovators, transforming visions into impactful online experiences. We focus on delivering tailored solutions that drive results for businesses."
         },
         {
-            keywords: ["portfolio", "work", "projects", "examples", "showcase","recent work","case studies"],
-            response: "Explore our 'Recent Work' section on this website to see a diverse range of projects. It showcases how we've helped clients achieve their digital goals with our creative and technical prowess."
+            keywords: ["portfolio", "work", "projects"],
+            response: "Explore our 'Recent Work' section on this website to see a diverse range of projects and the quality of our digital solutions!"
         },
         {
-            keywords: ["thank you", "thanks", "appreciate it", "cheers","grateful"],
-            response: "You're most welcome! I'm here to illuminate your path. Is there anything else about Digital Horizon you'd like to explore?"
+            keywords: ["pricing", "cost", "quote"],
+            response: "Our project costs are customized based on the scope, complexity, and specific requirements of your project. For a personalized quote, please type 'send inquiry' or 'book meeting' to discuss your needs with our team."
         },
         {
-            keywords: ["bye", "goodbye", "see ya", "farewell"],
-            response: "Goodbye! We look forward to building your next digital success with Digital Horizon. Have a brilliant day!"
+            keywords: ["thank you", "thanks"],
+            response: "You're most welcome! Is there anything else I can help you with?"
+        },
+        {
+            keywords: ["bye", "goodbye"],
+            response: "Goodbye! We look forward to building your next digital success. Have a brilliant day!"
+        },
+        {
+            keywords: ["cancel"],
+            response: "Okay, I've cancelled that request. How else can I help you today?"
         }
     ];
 
-    function addMessage(message, sender) {
+    // Function to add messages to the chat interface
+    function addMessageToChat(message, sender) {
         const messageElement = document.createElement('div');
-        messageElement.classList.add('message', sender);
+        messageElement.classList.add('chat-message', sender);
         messageElement.innerHTML = message;
         chatbotMessages.appendChild(messageElement);
         chatbotMessages.scrollTop = chatbotMessages.scrollHeight; // Auto-scroll to latest message
     }
 
-    function getBotResponse(userMessage) {
+    // Get a general bot response from knowledge base
+    function getGeneralBotResponse(userMessage) {
         const lowerCaseMessage = userMessage.toLowerCase().trim();
         for (const qa of chatbotKnowledge) {
             for (const keyword of qa.keywords) {
@@ -152,11 +166,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
-        return "I'm not quite sure I follow. I can tell you about: <ul><li>Our Services (Web Design, Development, chat bot)</li><li>How to Contact us</li><li> Pricing details</li><li>Or what makes Digital Horizon unique.</li></ul>How can I assist you further?";
+        return "I'm not quite sure I follow. You can ask about our services, what a website is, or type 'send inquiry' to send a message or 'book meeting' to schedule a call.";
     }
 
     // Chatbot Toggle Logic
     if (chatbotButton && chatbotBox && closeChatbot && chatbotMessages && chatbotInput && chatbotSend) {
+        // Initial welcome message when chatbot opens
         chatbotButton.addEventListener('click', () => {
             const isHidden = chatbotBox.classList.contains('chatbot-hidden');
             if (isHidden) {
@@ -164,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 chatbotBox.classList.add('chatbot-visible');
                 chatbotButton.style.display = 'none'; // Temporarily hide button when box is open
                 if (chatbotMessages.children.length === 0) {
-                    addMessage(getBotResponse("hello"), "bot"); // Send initial greeting
+                    addMessageToChat(getGeneralBotResponse("hello"), "bot"); // Send initial greeting
                 }
             } else {
                 chatbotBox.classList.remove('chatbot-visible');
@@ -183,16 +198,138 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 300);
         });
 
-        // Send Message Logic
-        chatbotSend.addEventListener('click', () => {
+        // Send Message Logic (handles both general chat and inquiry/booking flow)
+        chatbotSend.addEventListener('click', async () => { // Made async to await fetch
             const userMessage = chatbotInput.value;
-            if (userMessage.trim() !== '') {
-                addMessage(userMessage, 'user');
-                chatbotInput.value = ''; // Clear input
+            if (userMessage.trim() === '') {
+                return; // Don't send empty messages
+            }
+
+            addMessageToChat(userMessage, 'user');
+            chatbotInput.value = ''; // Clear input
+
+            const lowerCaseMessage = userMessage.toLowerCase().trim();
+
+            let botResponse = '';
+            let sendToFormSubmit = false; // Flag to indicate if we need to send data to FormSubmit
+
+            // Handle 'cancel' universally for ongoing flows
+            if (lowerCaseMessage === 'cancel') {
+                botResponse = getGeneralBotResponse('cancel');
+                botState = 'idle';
+                inquiryDetails = {}; // Clear any pending details
+                addMessageToChat(botResponse, 'bot');
+                return;
+            }
+
+            // --- Handle Inquiry Flow ---
+            if (botState === 'awaiting_email_inquiry') {
+                if (lowerCaseMessage.includes('@') && lowerCaseMessage.includes('.')) {
+                    inquiryDetails.email = lowerCaseMessage;
+                    botResponse = "Thanks! Now, please type the message you'd like to send to our team.";
+                    botState = 'awaiting_message_inquiry';
+                } else {
+                    botResponse = "That doesn't look like a valid email. Please try again or type 'cancel' to stop.";
+                }
+            } else if (botState === 'awaiting_message_inquiry') {
+                inquiryDetails.message = userMessage;
+                inquiryDetails.type = 'General Chatbot Inquiry';
+                sendToFormSubmit = true;
+                botResponse = "Processing your message..."; // Placeholder, actual response comes after fetch
+            }
+
+            // --- Handle Meeting Booking Flow ---
+            else if (botState === 'awaiting_meeting_date') {
+                inquiryDetails.date = userMessage; // Basic capture, could add date validation
+                botResponse = "Got it! And what time would you prefer for the meeting? (e.g., 2 PM, 14:00)";
+                botState = 'awaiting_meeting_time';
+            } else if (botState === 'awaiting_meeting_time') {
+                inquiryDetails.time = userMessage; // Basic capture, could add time validation
+                botResponse = "Okay, what is your name for the meeting?";
+                botState = 'awaiting_meeting_name';
+            } else if (botState === 'awaiting_meeting_name') {
+                inquiryDetails.name = userMessage;
+                botResponse = "And what is your best contact number or email?";
+                botState = 'awaiting_meeting_contact';
+            } else if (botState === 'awaiting_meeting_contact') {
+                inquiryDetails.contact = userMessage;
+                inquiryDetails.type = 'Meeting Booking Request';
+                sendToFormSubmit = true;
+                botResponse = "Thank you! Processing your meeting request..."; // Placeholder
+            }
+
+            // --- Handle Initial Triggers (when botState is 'idle') ---
+            else if (botState === 'idle') {
+                if (lowerCaseMessage.includes("send inquiry") || lowerCaseMessage.includes("contact support") || lowerCaseMessage === "contact us") {
+                    botResponse = "Okay, I can help you send a message to our team. What is your email address?";
+                    botState = 'awaiting_email_inquiry';
+                } else if (lowerCaseMessage.includes("book meeting") || lowerCaseMessage.includes("schedule call") || lowerCaseMessage.includes("appointment")) {
+                    botResponse = "I can help you arrange a meeting. What is your preferred date for the meeting? (e.g., 25th May)";
+                    botState = 'awaiting_meeting_date';
+                    inquiryDetails = {}; // Clear previous details for new booking
+                } else {
+                    // General chat response if no specific flow is triggered
+                    botResponse = getGeneralBotResponse(userMessage);
+                }
+            }
+
+            // Add bot response to chat
+            if (botResponse) {
                 setTimeout(() => {
-                    const botResponse = getBotResponse(userMessage);
-                    addMessage(botResponse, 'bot');
+                    addMessageToChat(botResponse, 'bot');
                 }, 600); // Simulate bot typing delay
+            }
+
+            // --- Send data to FormSubmit.co if flagged ---
+            if (sendToFormSubmit) {
+                const formData = new FormData();
+                let subject = '';
+                let messageBody = '';
+
+                if (inquiryDetails.type === 'General Chatbot Inquiry') {
+                    subject = `General Chatbot Inquiry from ${inquiryDetails.email || 'Unknown'}`;
+                    formData.append('_replyto', inquiryDetails.email);
+                    messageBody = `User Email: ${inquiryDetails.email}\nMessage: ${inquiryDetails.message}`;
+                } else if (inquiryDetails.type === 'Meeting Booking Request') {
+                    subject = `New Meeting Request from Chatbot - ${inquiryDetails.name || 'Unknown'}`;
+                    formData.append('_replyto', inquiryDetails.contact); // Assuming contact is email or phone for reply
+                    messageBody = `Meeting Request Details:\n` +
+                                  `Name: ${inquiryDetails.name || 'N/A'}\n` +
+                                  `Contact: ${inquiryDetails.contact || 'N/A'}\n` +
+                                  `Preferred Date: ${inquiryDetails.date || 'N/A'}\n` +
+                                  `Preferred Time: ${inquiryDetails.time || 'N/A'}\n` +
+                                  `This is a request, please confirm directly with the client.`;
+                }
+
+                formData.append('_subject', subject);
+                formData.append('message', messageBody); // The main message content
+
+                try {
+                    const response = await fetch('https://formsubmit.co/baathish9@gmail.com', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    // FormSubmit.co usually returns a 200 OK and might redirect on success
+                    if (response.ok) {
+                        if (inquiryDetails.type === 'General Chatbot Inquiry') {
+                            addMessageToChat("Your message has been sent to our team. We'll get back to you soon!", 'bot');
+                        } else if (inquiryDetails.type === 'Meeting Booking Request') {
+                            addMessageToChat("Your meeting request has been sent! Our team will contact you shortly to confirm the details. Thank you!", 'bot');
+                        }
+                    } else {
+                        // Attempt to parse JSON error if available, otherwise general error
+                        const errorText = await response.text(); // Get raw text for inspection
+                        console.error('FormSubmit.co response error:', response.status, errorText);
+                        addMessageToChat("Oops! There was an error sending your request. Please try again later, or contact us directly.", 'bot');
+                    }
+                } catch (error) {
+                    console.error('Network or FormSubmit.co submission error:', error);
+                    addMessageToChat("A network error occurred. Please check your connection and try again.", 'bot');
+                } finally {
+                    botState = 'idle'; // Reset state after sending or error
+                    inquiryDetails = {}; // Clear details
+                }
             }
         });
 
@@ -227,5 +364,4 @@ document.addEventListener('DOMContentLoaded', () => {
         element.style.transition = 'opacity 0.8s ease-out, transform 0.8s ease-out';
         animationObserver.observe(element);
     });
-
 });
