@@ -307,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
                 try {
-                    const response = await fetch('https://formsubmit.co/baathish9@gmail.com', { // Ensure your email is here
+                    const response = await fetch('https://formsubmit.co/baathish9@email.com', { // Ensure your email is here
                         method: 'POST',
                         body: formData
                     });
